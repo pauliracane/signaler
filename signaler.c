@@ -1,4 +1,5 @@
-#include <stdio.h> //For error checking mainly.
+#include <stdio.h>	//For error checking mainly.
+#include <stdlib.h> //For Sleep, I think
 #include <signal.h> //For signal handling / catching
 #include <limits.h> //For UINT_MAX
 #include <stdlib.h> //For Calloc
@@ -9,6 +10,7 @@ void SIGHUP_Handler(int signum);
 void SIGUSR1_Handler(int signum);
 void SIGUSR2_Handler(int signum);
 int * GenPrimes(unsigned int *a);
+void PrintPrimes(unsigned int *a);
 
 
 int main(int argc, char *argv[])
@@ -33,6 +35,14 @@ int main(int argc, char *argv[])
 
 	printf("Finished in %ld.\n", time(NULL) - total_time);
 
+	PrintPrimes(a);
+
+    free(a);
+    return 0;
+}
+
+void PrintPrimes(unsigned int *a)
+{
 	for(unsigned int i = 0; i < SHRT_MAX; i++) 
 	{
 		/* Print all the non Zero *Prime numbers* */
@@ -40,26 +50,27 @@ int main(int argc, char *argv[])
 		{
 			printf("%d \n", a[i]);
 		}
-
-		signal(SIGHUP, SIGHUP_Handler);
+		sleep(1);
+		if(signal(SIGHUP, SIGHUP_Handler) == SIGHUP)
+		{
+			i = 0;
+		}
 		signal(SIGUSR1, SIGUSR1_Handler);
 		signal(SIGUSR2, SIGUSR2_Handler);
 	}
-	free(a);
-	return 0;
 }
 
 void SIGHUP_Handler(int signum)
 {
-	printf("%d\n", signum);
+	printf("Received Signal %d; SIGHUP\n");
 }
 void SIGUSR1_Handler(int signum)
 {
-	printf("%d\n", signum);
+	printf("Received Signal %d; SIGUSR1\n");
 }
 void SIGUSR2_Handler(int signum)
 {
-    printf("%d\n", signum);
+	printf("Received Signal %d; SIGUSR2\n");
 }
 
 int *GenPrimes(unsigned int *a)
