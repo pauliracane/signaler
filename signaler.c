@@ -53,6 +53,11 @@ int main(int argc, char *argv[])
 	if ( start )
 	{	
 		PrimeLCV = start/2;	
+		if ( reverse )
+		{
+			PrimeLCV --;
+		}
+
 	}
 
 	PrintPrimes(a);
