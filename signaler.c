@@ -5,9 +5,9 @@
 #include <stdlib.h> //For Calloc
 #include <getopt.h>	//For optarg
 
-/*	Notes:  If you tell it to print at 2; it won't.  It will start at 3 instead.
- *
- *
+/*	Notes:  If you tell it to start at 2; it won't.  It will start at 3 instead.
+ *			It will ignore string input on the arguments. I'm okay with that.
+ *			
  */
 
 
@@ -171,6 +171,10 @@ void ParseInput(char *argv[], int argc)
 				break;
 			case 'e':
 				QuitVal = atoi(optarg);
+				if( QuitVal == 0)
+				{
+					QuitVal = USHRT_MAX-2;
+				}
 				break;
 			default:
 				printf("Standard usage of this program is:\n");
