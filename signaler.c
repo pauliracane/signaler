@@ -28,14 +28,14 @@ int main(int argc, char *argv[])
 	// http://stackoverflow.com/a/31322918
 	for(unsigned int j=0,i=2; i < SHRT_MAX && i > 0; i++, j++)
 	{
-		a[j]=i;	
+		a[j]=i;	//Make array of all numbers between 2 and shrt_max (36535)
 	}
 
     printf("Starting Prime Number Gen.\n");
 	printf("Time taken: %ld\n", time(NULL) - total_time);
 
-	a = GenPrimes(a);
-
+	a = GenPrimes(a);	//Walk through array, setting non-primes to 0
+						//And leaving primes as is.
 	printf("Finished in %ld.\n", time(NULL) - total_time);
 
 	PrintPrimes(a);
@@ -50,8 +50,8 @@ void PrintPrimes(unsigned int *a)
 	while(PrimeLCV < SHRT_MAX) 
 	{
 		/* Print all the non Zero *Prime numbers* */
-		if(a[PrimeLCV] != 0 && skipnext == 0)
-		{
+		if(a[PrimeLCV] != 0 && skipnext == 0)	//Only prime numbers are left
+		{										//In function A; rest are 0.
 			printf("%d \n", a[PrimeLCV]);
 			sleep(1);
 		}
@@ -60,23 +60,23 @@ void PrintPrimes(unsigned int *a)
 			skipnext = 0;
 		}
 
-		signal(SIGHUP, SIGHUP_Handler);
-		signal(SIGUSR1, SIGUSR1_Handler);
-		signal(SIGUSR2, SIGUSR2_Handler);
-
-		if ( reverse == 1 )
+		signal(SIGHUP, SIGHUP_Handler);		//Catch signal 'SIGHUP' (1)
+		signal(SIGUSR1, SIGUSR1_Handler);	//Catch signal 'SIGUSR1' (10)
+		signal(SIGUSR2, SIGUSR2_Handler);	//Catch signal 'SIGUSR2' (12)
+											//And call appropriate function
+		if ( reverse )
 		{
-			if(PrimeLCV == 0)
+			if(PrimeLCV == 0)	//Check to make sure not printing below 2.
 			{
-				break;
+				break;			//Exit function.
 			}
 			PrimeLCV--;
 		}
 		else
 		{
-			if(PrimeLCV > SHRT_MAX)
+			if(PrimeLCV > SHRT_MAX)	//Check to ensure number within range
 			{
-				break;
+				break;			//Exit Function
 			}
 			PrimeLCV++;
 		}
@@ -91,23 +91,29 @@ void SIGHUP_Handler(int signum)
 void SIGUSR1_Handler(int signum)
 {
 	printf("Received Signal %d; SIGUSR1\n", signum);
-	skipnext = 1;
+	skipnext = 1;		//Set skip int
 }
 void SIGUSR2_Handler(int signum)
 {
 	printf("Received Signal %d; SIGUSR2\n", signum);
 	if (reverse == 0)
 	{
-		reverse = 1;
+		reverse = 1;	//Set Reverse to be true
 	}
 	else
 	{
-		reverse = 0;
+		reverse = 0;	//Set reverse to be false.
 	}
 }
 
 unsigned int *GenPrimes(unsigned int *a)
 {
+	//Short walkthough to explain what's happening.
+	//Take number at a[0] (2)
+	//go through entire array, removing all numbers
+	//evenly divisible by a[0] (2); make them 0.
+	//after walk through entire array, increment to next
+	//a; a[1] (3).
 	for(unsigned int i = 0; i < SHRT_MAX; i++)
     {
         int num = a[i];
