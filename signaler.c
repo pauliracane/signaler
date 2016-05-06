@@ -173,7 +173,7 @@ void ParseInput(char *argv[], int argc)
 				break;
 			default:
 				printf("Standard usage of this program is:\n");
-				printf("%s (-s <number> or -r <number>) -e <number>)\n",
+				printf("%s (-s <number> or -r <number>) -e <number>\n",
 						argv[0]);
 				exit(9);
 		}
