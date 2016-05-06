@@ -157,12 +157,19 @@ unsigned int *GenPrimes(unsigned int *a)
 
 void ParseInput(char *argv[], int argc)
 {
+	//Reads in user input, for '-*' looking for R, S, or E.
+	//If it finds it, handles it appropriately.
 	int c = 0;
 	while ((c = getopt(argc,argv,"r:s:e:")) != -1)
 	{
 		switch(c)
 		{
 			case 'r':
+				//If it finds -r It sets the reverse bit.
+				//Then it grabs the starting location.
+				//Checks if Starting Location is out of range
+				//Prints correct range if it is
+				//And assigns the starting location.
 				reverse = 1;
 				start = atoi(optarg);
 				if ( start > USHRT_MAX )
@@ -172,6 +179,10 @@ void ParseInput(char *argv[], int argc)
 				}
 				break;
 			case 's':
+				//If it finds -s it converts input to int
+				////Checks if Starting Location is out of range
+				////Prints correct range if it is
+				////And assigns the starting location.
 				start = atoi(optarg);
                 if ( start > USHRT_MAX  )
 				{
@@ -180,6 +191,9 @@ void ParseInput(char *argv[], int argc)
 				}
 				break;
 			case 'e':
+				//If it finds -e converts input to int
+				////Checks if input was word (If it was atoi returns 0)
+				////assigns standard range if it is
 				QuitVal = atoi(optarg);
 				if( QuitVal == 0)
 				{
@@ -187,6 +201,8 @@ void ParseInput(char *argv[], int argc)
 				}
 				break;
 			default:
+				//Default case;
+				//Gives program usage and exits.
 				printf("Standard usage of this program is:\n");
 				printf("%s (-s <number> / -r <number>) -e <number>\n",
 						argv[0]);
