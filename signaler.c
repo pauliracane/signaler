@@ -4,7 +4,6 @@
 #include <limits.h> //For USHRT_MAX
 #include <stdlib.h> //For Calloc
 #include <getopt.h>	//For optarg
-#include <time.h>	//Currently used to check time to walk through sections
 
 /*	Notes:  If you tell it to print at 2; it won't.  It will start at 3 instead.
  *
@@ -19,16 +18,14 @@ unsigned int * GenPrimes(unsigned int *a);
 void PrintPrimes(unsigned int *a);
 void ParseInput(char *argv[], int argc);
 
-int PrimeLCV = 0;	//Used to control which prime is printing
-int reverse = 0;	//Used to determine if loop is moving forwards or backwards
-int skipnext = 0;	//Used to literally skip next prime
-int start = 0;		//Arbitrary Start Value
-int QuitVal= USHRT_MAX-2;	//Arbitrary End Value
+unsigned int PrimeLCV = 0;	//Used to control which prime is printing
+unsigned int reverse = 0;	//determine if loop is increasing or decreasing
+unsigned int skipnext = 0;	//Used to literally skip next prime
+unsigned int start = 0;		//Arbitrary Start Value
+unsigned int QuitVal= USHRT_MAX-2;	//Arbitrary End Value
 
 int main(int argc, char *argv[])
 {
-	int total_time = time(NULL);
-
 	if ( argc > 1 )
 	{
 		ParseInput(argv, argc);
@@ -43,13 +40,8 @@ int main(int argc, char *argv[])
 		a[j]=i;	//Make array of all numbers between 2 and shrt_max (36535)
 	}
 
-    printf("Starting Prime Number Gen.\n");
-	printf("Time taken to this point: %ld seconds\n", time(NULL) - total_time);
-
 	a = GenPrimes(a);	//Walk through array, setting non-primes to 0
 						//And leaving primes as is.
-	printf("Finished in %ld seconds.\n", time(NULL) - total_time);
-
 	if ( start )
 	{	
 		PrimeLCV = start/2;	
@@ -57,7 +49,6 @@ int main(int argc, char *argv[])
 		{
 			PrimeLCV --;
 		}
-
 	}
 
 	PrintPrimes(a);
@@ -106,17 +97,17 @@ void PrintPrimes(unsigned int *a)
 
 void SIGHUP_Handler(int signum)
 {
-	printf("Received Signal %d; SIGHUP\n", signum);
+	printf("Received Restart Signal (%d)\n", signum);
 	PrimeLCV = 0-1;	//Global Variables make life easy.
 }
 void SIGUSR1_Handler(int signum)
 {
-	printf("Received Signal %d; SIGUSR1\n", signum);
+	printf("Received SkipNext Signal (%d)\n", signum);
 	skipnext = 1;		//Set skip int
 }
 void SIGUSR2_Handler(int signum)
 {
-	printf("Received Signal %d; SIGUSR2\n", signum);
+	printf("Received Reverse Signal (%d)\n", signum);
 	if (reverse == 0)
 	{
 		reverse = 1;	//Set Reverse to be true
@@ -164,9 +155,19 @@ void ParseInput(char *argv[], int argc)
 			case 'r':
 				reverse = 1;
 				start = atoi(optarg);
+				if ( start > USHRT_MAX )
+				{
+					printf("Range is from 0-65535.\n");
+					start = USHRT_MAX-2;
+				}
 				break;
 			case 's':
 				start = atoi(optarg);
+                if ( start > USHRT_MAX  )
+				{
+					printf("Range is from 0-65535.\n");
+					start = 0;
+				}
 				break;
 			case 'e':
 				QuitVal = atoi(optarg);
