@@ -1,9 +1,15 @@
 #include <stdio.h>	//For error checking mainly.
 #include <unistd.h> //For Sleep, I think
 #include <signal.h> //For signal handling / catching
-#include <limits.h> //For UINT_MAX
+#include <limits.h> //For USHRT_MAX
 #include <stdlib.h> //For Calloc
+#include <getopt.h>	//For optarg
 #include <time.h>	//Currently used to check time to walk through sections
+
+/*	Notes:  If you tell it to print at 2; it won't.  It will start at 3 instead.
+ *
+ *
+ */
 
 
 void SIGHUP_Handler(int signum);
@@ -11,32 +17,43 @@ void SIGUSR1_Handler(int signum);
 void SIGUSR2_Handler(int signum);
 unsigned int * GenPrimes(unsigned int *a);
 void PrintPrimes(unsigned int *a);
+void ParseInput(char *argv[], int argc);
 
 int PrimeLCV = 0;	//Used to control which prime is printing
 int reverse = 0;	//Used to determine if loop is moving forwards or backwards
 int skipnext = 0;	//Used to literally skip next prime
+int start = 0;		//Arbitrary Start Value
+int QuitVal= USHRT_MAX-2;	//Arbitrary End Value
 
 int main(int argc, char *argv[])
 {
 	int total_time = time(NULL);
 
-	printf("Attempting to malloc array.\n");
+	if ( argc > 1 )
+	{
+		ParseInput(argv, argc);
+	}
 
-	unsigned int *a = calloc(SHRT_MAX, sizeof *a); //Array for Numbers
-	printf("Starting!\n");
-
+	unsigned int *a = calloc(USHRT_MAX, sizeof *a); //Array for Numbers
+	
+	a[0]=2;
 	// http://stackoverflow.com/a/31322918
-	for(unsigned int j=0,i=2; i < SHRT_MAX && i > 0; i++, j++)
+	for(unsigned int j=1,i=3; i < USHRT_MAX && i > 0; i+=2, j++)
 	{
 		a[j]=i;	//Make array of all numbers between 2 and shrt_max (36535)
 	}
 
     printf("Starting Prime Number Gen.\n");
-	printf("Time taken: %ld\n", time(NULL) - total_time);
+	printf("Time taken to this point: %ld seconds\n", time(NULL) - total_time);
 
 	a = GenPrimes(a);	//Walk through array, setting non-primes to 0
 						//And leaving primes as is.
-	printf("Finished in %ld.\n", time(NULL) - total_time);
+	printf("Finished in %ld seconds.\n", time(NULL) - total_time);
+
+	if ( start )
+	{	
+		PrimeLCV = start/2;	
+	}
 
 	PrintPrimes(a);
 
@@ -47,16 +64,15 @@ int main(int argc, char *argv[])
 void PrintPrimes(unsigned int *a)
 {
     // http://stackoverflow.com/a/31322918
-	while(PrimeLCV < SHRT_MAX) 
+	while(PrimeLCV < QuitVal ) 
 	{
 		/* Print all the non Zero *Prime numbers* */
-		if(a[PrimeLCV] != 0 && skipnext == 0)	//Only prime numbers are left
-		{										//In function A; rest are 0.
-			printf("%d \n", a[PrimeLCV]);
+		if(a[PrimeLCV] != 0 && skipnext == 0)
+		{										//Only prime numbers are left
+			printf("%d \n", a[PrimeLCV]);		//In function A; rest are 0.
 			sleep(1);
 		}
-		else if (a[PrimeLCV] != 0 && skipnext == 1)
-		{
+		else if (a[PrimeLCV] != 0 && skipnext == 1)		{
 			skipnext = 0;
 		}
 
@@ -74,7 +90,7 @@ void PrintPrimes(unsigned int *a)
 		}
 		else
 		{
-			if(PrimeLCV > SHRT_MAX)	//Check to ensure number within range
+			if(PrimeLCV > USHRT_MAX)	//Check to ensure number within range
 			{
 				break;			//Exit Function
 			}
@@ -114,14 +130,14 @@ unsigned int *GenPrimes(unsigned int *a)
 	//evenly divisible by a[0] (2); make them 0.
 	//after walk through entire array, increment to next
 	//a; a[1] (3).
-	for(unsigned int i = 0; i < SHRT_MAX; i++)
+	for(unsigned int i = 0; i < USHRT_MAX; i++)
     {
         int num = a[i];
 
 		//If number is not 0, update later array index.
 		if ( num != 0 )
 		{
-			for (unsigned int j = i+1; j < SHRT_MAX; j++)
+			for (unsigned int j = i+1; j < USHRT_MAX; j++)
 			{
 				if( ( a[j]%num == 0 ) )
 				{
@@ -131,4 +147,30 @@ unsigned int *GenPrimes(unsigned int *a)
 		}
 	}
 	return a;
+}
+
+void ParseInput(char *argv[], int argc)
+{
+	int c = 0;
+	while ((c = getopt(argc,argv,"r:s:e:")) != -1)
+	{
+		switch(c)
+		{
+			case 'r':
+				reverse = 1;
+				start = atoi(optarg);
+				break;
+			case 's':
+				start = atoi(optarg);
+				break;
+			case 'e':
+				QuitVal = atoi(optarg);
+				break;
+			default:
+				printf("Standard usage of this program is:\n");
+				printf("%s (-s <number> or -r <number>) -e <number>)\n",
+						argv[0]);
+				exit(9);
+		}
+	}
 }
