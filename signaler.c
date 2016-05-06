@@ -3,15 +3,18 @@
 #include <signal.h> //For signal handling / catching
 #include <limits.h> //For UINT_MAX
 #include <stdlib.h> //For Calloc
-#include <time.h>	//You don't want to know.
+#include <time.h>	//Currently used to check time to walk through sections
 
 
-int SIGHUP_Handler(int signum);
+void SIGHUP_Handler(int signum);
 void SIGUSR1_Handler(int signum);
 void SIGUSR2_Handler(int signum);
-int * GenPrimes(unsigned int *a);
-void PrintPrimes(unsigned int *a);
+unsigned int * GenPrimes(unsigned int *a);
+void PrintPrimes(unsigned int *a, int reverse);
 
+int PrimeLCV = 0;	//Used to control which prime is printing
+int reverse = 0;	//Used to determine if loop is moving forwards or backwards
+int skipnext = 0;	//Used to literally skip next prime
 
 int main(int argc, char *argv[])
 {
@@ -35,48 +38,67 @@ int main(int argc, char *argv[])
 
 	printf("Finished in %ld.\n", time(NULL) - total_time);
 
-	PrintPrimes(a);
+	PrintPrimes(a, reverse);
 
     free(a);
     return 0;
 }
 
-void PrintPrimes(unsigned int *a)
+void PrintPrimes(unsigned int *a, int reverse)
 {
-	for(unsigned int i = 0; i < SHRT_MAX; i++) 
+    // http://stackoverflow.com/a/31322918
+	for(PrimeLCV; PrimeLCV < SHRT_MAX;) 
 	{
 		/* Print all the non Zero *Prime numbers* */
-		if(a[i] != 0) 
+		if(a[PrimeLCV] != 0 && skipnext == 0)
 		{
-			printf("%d \n", a[i]);
+			printf("%d \n", a[PrimeLCV]);
 			sleep(1);
 		}
-		if(signal(SIGHUP, SIGHUP_Handler) == SIG_ERR)
+		else if (a[PrimeLCV] != 0 && skipnext == 1)
 		{
-			i = 0-1;
+			skipnext = 0;
 		}
+
+		signal(SIGHUP, SIGHUP_Handler);
 		signal(SIGUSR1, SIGUSR1_Handler);
 		signal(SIGUSR2, SIGUSR2_Handler);
+
+		if ( reverse == 1 )
+		{
+			PrimeLCV--;
+		}
+		else
+		{
+			PrimeLCV++;
+		}
 	}
 }
 
-int SIGHUP_Handler(int signum)
+void SIGHUP_Handler(int signum)
 {
 	printf("Received Signal %d; SIGHUP\n", signum);
-	return signum;
+	PrimeLCV = 0-1;	//Global Variables make life easy.
 }
 void SIGUSR1_Handler(int signum)
 {
 	printf("Received Signal %d; SIGUSR1\n", signum);
-    return signum;
+	skipnext = 1;
 }
 void SIGUSR2_Handler(int signum)
 {
 	printf("Received Signal %d; SIGUSR2\n", signum);
-    return signum;
+	if (reverse == 0)
+	{
+		reverse = 1;
+	}
+	else
+	{
+		reverse = 0;
+	}
 }
 
-int *GenPrimes(unsigned int *a)
+unsigned int *GenPrimes(unsigned int *a)
 {
 	for(unsigned int i = 0; i < SHRT_MAX; i++)
     {
@@ -94,6 +116,5 @@ int *GenPrimes(unsigned int *a)
 			}
 		}
 	}
-
 	return a;
 }
