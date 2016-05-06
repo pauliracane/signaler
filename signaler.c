@@ -10,7 +10,7 @@ void SIGHUP_Handler(int signum);
 void SIGUSR1_Handler(int signum);
 void SIGUSR2_Handler(int signum);
 unsigned int * GenPrimes(unsigned int *a);
-void PrintPrimes(unsigned int *a, int reverse);
+void PrintPrimes(unsigned int *a);
 
 int PrimeLCV = 0;	//Used to control which prime is printing
 int reverse = 0;	//Used to determine if loop is moving forwards or backwards
@@ -38,16 +38,16 @@ int main(int argc, char *argv[])
 
 	printf("Finished in %ld.\n", time(NULL) - total_time);
 
-	PrintPrimes(a, reverse);
+	PrintPrimes(a);
 
     free(a);
     return 0;
 }
 
-void PrintPrimes(unsigned int *a, int reverse)
+void PrintPrimes(unsigned int *a)
 {
     // http://stackoverflow.com/a/31322918
-	for(PrimeLCV; PrimeLCV < SHRT_MAX;) 
+	while(PrimeLCV < SHRT_MAX) 
 	{
 		/* Print all the non Zero *Prime numbers* */
 		if(a[PrimeLCV] != 0 && skipnext == 0)
@@ -66,10 +66,18 @@ void PrintPrimes(unsigned int *a, int reverse)
 
 		if ( reverse == 1 )
 		{
+			if(PrimeLCV == 0)
+			{
+				break;
+			}
 			PrimeLCV--;
 		}
 		else
 		{
+			if(PrimeLCV > SHRT_MAX)
+			{
+				break;
+			}
 			PrimeLCV++;
 		}
 	}
