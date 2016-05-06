@@ -14,6 +14,7 @@
 void SIGHUP_Handler(int signum);
 void SIGUSR1_Handler(int signum);
 void SIGUSR2_Handler(int signum);
+void SIGINT_Handler(int signum);
 unsigned int * GenPrimes(unsigned int *a);
 void PrintPrimes(unsigned int *a);
 void ParseInput(char *argv[], int argc);
@@ -23,6 +24,7 @@ unsigned int reverse = 0;	//determine if loop is increasing or decreasing
 unsigned int skipnext = 0;	//Used to literally skip next prime
 unsigned int start = 0;		//Arbitrary Start Value
 unsigned int QuitVal= USHRT_MAX-2;	//Arbitrary End Value
+int quit = 0;
 
 int main(int argc, char *argv[])
 {
@@ -75,7 +77,7 @@ void PrintPrimes(unsigned int *a)
 		signal(SIGHUP, SIGHUP_Handler);		//Catch signal 'SIGHUP' (1)
 		signal(SIGUSR1, SIGUSR1_Handler);	//Catch signal 'SIGUSR1' (10)
 		signal(SIGUSR2, SIGUSR2_Handler);	//Catch signal 'SIGUSR2' (12)
-											//And call appropriate function
+		signal(SIGINT, SIGINT_Handler);		//And call appropriate function
 		if ( reverse )
 		{
 			if(PrimeLCV == 0)	//Check to make sure not printing below 2.
@@ -91,6 +93,10 @@ void PrintPrimes(unsigned int *a)
 				break;			//Exit Function
 			}
 			PrimeLCV++;
+		}
+		if (quit == 1)
+		{
+			break;
 		}
 	}
 }
@@ -117,7 +123,11 @@ void SIGUSR2_Handler(int signum)
 		reverse = 0;	//Set reverse to be false.
 	}
 }
-
+void SIGINT_Handler(int signum)
+{
+	printf("\nReceived Quit Signal (%d)\n", signum);
+	quit = 1;
+}
 unsigned int *GenPrimes(unsigned int *a)
 {
 	//Short walkthough to explain what's happening.
